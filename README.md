@@ -25,7 +25,7 @@ Welcome to my learning repository for the AWS Cloud Practitioner certification! 
 * [EC2 Instance Store](#ec2-instance-store)
 * [Elastic File System (EFS)](#elastic-file-system-efs)
 * [Amazon FSx](#amazon-fsx)
-* [Storage and Image Services - Summary](#storage-and-descriptive-statistics)
+* [Storage and Image Services - Summary](#storage-and-image-services---summary)
 * [Scalability & High Availability](#scalability--high-availability)
     * [Scalability](#scalability)
     * [High Availability](#high-availability)
