@@ -76,6 +76,18 @@ Welcome to my learning repository for the AWS Cloud Practitioner certification! 
     * [Amazon Managed Blockchain](#amazon-managed-blockchain)
     * [AWS Glue](#aws-glue)
     * [Amazon DMS (Database Migration Service)](#amazon-dms-database-migration-service)
+* [Compute Services in AWS](#compute-services-in-aws)
+    * [Amazon Elastic Container Service (ECS)](#amazon-elastic-container-service-ecs)
+    * [AWS Fargate](#aws-fargate)
+    * [Amazon Elastic Container Registry (ECR)](#amazon-elastic-container-registry-ecr)
+    * [Amazon Elastic Kubernetes Service (EKS)](#amazon-elastic-kubernetes-service-eks)
+    * [Serverless Computing](#serverless-computing)
+    * [Amazon Lambda](#amazon-lambda)
+        * [Lambda vs. EC2 Instance Comparison](#lambda-vs-ec2-instance-comparison)
+    * [Amazon API Gateway](#amazon-api-gateway)
+    * [AWS Batch](#aws-batch)
+        * [Lambda vs. Batch Comparison](#lambda-vs-batch-comparison)
+    * [Amazon LightSail](#amazon-lightsail)
 
 ---
 
@@ -119,7 +131,7 @@ A typical IAM policy consists of the following key elements:
         * **Condition (optional)**:
             * Specifies conditions for when this policy is in effect. This allows for fine-grained control based on factors like time of day, source IP address, or whether MFA is used.
 
-**Example Policy Structure (as seen in the image):**
+**Example Policy Structure:**
 
 ```json
 {
@@ -220,7 +232,7 @@ Understanding common network ports is crucial for configuring security groups:
 
 * **22 = SSH (Secure Shell)**: Used to log into Linux instances, execute commands, and transfer files securely.
 * **21 = FTP (File Transfer Protocol)**: Used to upload/download files to/from a file share. (Note: FTP is often considered less secure than SFTP/SCP).
-* **22 = SFTP (Secure File Transfer Protocol)**: Used to upload files securely, leveraging SSH.
+* **22 = SFTP (Secure File Transfer Protocol)**: Used to upload files securely, leveraging SSH. It doesn't need to open a different port
 * **80 = HTTP**: Used to access unsecured websites.
 * **443 = HTTPS**: Used to access secured websites (encrypted communication).
 * **3389 = RDP (Remote Desktop Protocol)**: Used to log into Windows instances with a graphical interface.
@@ -988,3 +1000,117 @@ Amazon DMS is a service that helps you migrate databases to AWS quickly and secu
     * **Self-healing & Resilient**: Handles network interruptions and automatically restarts migrations.
     * **Minimal Downtime**: The source database remains available and operational during most migrations (using Change Data Capture - CDC).
 * **Use Cases**: Database consolidation, continuous data replication, and moving production databases to AWS.
+
+---
+## Compute Services in AWS
+
+AWS offers a diverse range of compute services to run your applications, from virtual servers to container orchestration and serverless functions, catering to different architectural needs and management preferences.
+
+### Amazon Elastic Container Service (ECS)
+
+Amazon ECS is a highly scalable, high-performance container orchestration service that supports Docker containers.
+
+* **Docker Container Orchestration**: Used to launch and manage Docker containers on AWS.
+* **Infrastructure Management**: Users must provision and maintain the underlying infrastructure (EC2 instances) on which these Dockerized applications run.
+* **Application Management**: AWS handles the starting, stopping, and management of your containerized applications.
+* **Integration**: Seamlessly integrates with Application Load Balancers for traffic distribution.
+
+### AWS Fargate
+
+AWS Fargate is a serverless compute engine for Amazon ECS that allows you to run containers without having to provision or manage servers or clusters.
+
+* **Serverless Containers**: Launch Docker containers on AWS without managing the underlying EC2 instances.
+* **No Infrastructure Management**: You don't provision or manage any infrastructure; AWS runs the containers for you.
+* **Pay for Resources**: You pay only for the CPU and RAM resources that your containers consume.
+
+### Amazon Elastic Container Registry (ECR)
+
+Amazon ECR is a fully managed Docker container registry that makes it easy to store, manage, and deploy Docker container images.
+
+* **Private Docker Registry**: Provides a private, secure, and highly available repository on AWS for your Docker images.
+* **Image Storage**: This is where you store your Docker images so they can be easily pulled and run by services like ECS or Fargate.
+
+### Amazon Elastic Kubernetes Service (EKS)
+
+Amazon EKS is a managed service that makes it easy to deploy, manage, and scale containerized applications using Kubernetes on AWS.
+
+* **Managed Kubernetes Cluster**: Allows you to launch a fully managed Kubernetes control plane on AWS.
+* **Kubernetes**: An open-source system for automating deployment, scaling, and management of containerized applications.
+* **Cloud Agnostic**: Kubernetes is cloud-agnostic, meaning it can be used across various cloud providers (AWS, GCP, Azure) and on-premises.
+
+### Serverless Computing
+
+Serverless computing is a paradigm where developers don't manage servers directly. While servers still exist, their provisioning, scaling, and management are entirely abstracted away from the developer.
+
+* **Pioneered by AWS Lambda**: AWS Lambda was a pioneering service in the serverless space.
+* **Abstraction, Not Absence**: "Serverless" doesn't mean there are no servers; it means the user doesn't see, manage, or provision them.
+* **Examples of Serverless Offerings**: AWS Lambda, Amazon S3, Amazon DynamoDB, AWS Fargate.
+
+### Amazon Lambda
+
+Amazon Lambda is a serverless compute service that lets you run code without provisioning or managing servers.
+
+* **Function as a Service (FaaS)**: You upload your code as "functions," and Lambda executes them when needed.
+* **Easy Pricing**: You pay only for the compute time consumed per request.
+    * **Pay per Calls**: `$0.20 per million requests` after the first 1 million free requests.
+    * **Pay per Duration**: `$1.00 per 600,000 GB-seconds` after free consumption (duration is billed in milliseconds).
+* **AWS Service Integration**: Seamlessly integrates with a wide suite of other AWS services.
+* **Event-Driven**: Functions are invoked by AWS services (e.g., S3 events, DynamoDB streams, API Gateway requests) when specific events occur.
+* **Easy Monitoring**: Integrated with AWS CloudWatch for monitoring and logging.
+* **Resource Allocation**: Increasing the allocated RAM for a Lambda function also proportionally increases CPU and network resources, providing more power per function execution.
+* **Language Support**: Supports many programming languages, including Node.js, Python, Java, C#, Go, and Ruby.
+
+#### Lambda vs. EC2 Instance Comparison
+
+| Feature               | EC2 (Virtual Servers)                                 | Lambda (Virtual Functions)                          |
+| :-------------------- | :---------------------------------------------------- | :-------------------------------------------------- |
+| **Server Management** | User manages virtual servers in the cloud.            | No servers to manage (fully serverless).            |
+| **Execution Limit** | Limited by available RAM and CPU on the instance.     | Limited by time (short executions, max 15 minutes). |
+| **Runtime** | Runs continuously (always-on).                        | Runs on-demand in response to events.               |
+| **Scaling** | Manual intervention (or ASG) to add/remove servers.   | Scaling is automated and instant.                   |
+| **Pricing** | Pay per instance-hour/second.                         | Pay per request and compute time (GB-seconds).      |
+
+### Amazon API Gateway
+
+Amazon API Gateway is a fully managed service that allows developers to easily create, publish, maintain, monitor, and secure APIs at any scale.
+
+* **API Exposure**: A Lambda function, by itself, is not publicly callable as an API. API Gateway is used to expose Lambda functions (and other backend services) as HTTP APIs.
+* **Fully Managed & Scalable**: Serverless service that automatically scales to handle any volume of API calls.
+* **API Types**: Supports building RESTful APIs and WebSocket APIs.
+* **Features**: Provides out-of-the-box support for:
+    * Security and user authentication.
+    * API throttling to prevent abuse.
+    * API keys for access control.
+    * Monitoring and logging.
+
+### AWS Batch
+
+AWS Batch is a fully managed service that enables developers, scientists, and engineers to easily run hundreds of thousands of computing batch jobs on AWS.
+
+* **Fully Managed Batch Processing**: Handles the complexities of provisioning, managing, and scaling compute resources for batch workloads.
+* **Large-Scale Batch Jobs**: Used to efficiently run 100,000s of computing batch jobs.
+* **Job Definition**: A batch job is a discrete task with a defined start and an end (as opposed to continuous services).
+* **Dynamic Resource Provisioning**: Batch dynamically launches EC2 instances (including Spot Instances for cost savings) to match the compute and memory requirements of your jobs.
+* **Simplified Workflow**: User just submits/schedules the jobs; AWS Batch handles the queuing, execution, and scaling of the compute environment.
+* **Docker-based**: Batch jobs are defined as Docker images and run on ECS.
+* **Benefits**: Helps with cost optimization by using appropriate instance types and Spot Instances, allowing users to focus less on infrastructure management.
+
+#### Lambda vs. Batch Comparison
+
+| Feature                 | Amazon Lambda                                       | AWS Batch                                            |
+| :---------------------- | :-------------------------------------------------- | :--------------------------------------------------- |
+| **Execution Duration** | Time-limited (max 15 minutes).                      | No time limit (can run for hours/days).              |
+| **Runtimes** | Limited set of supported runtimes.                  | Any runtime as long as it's packaged as a Docker image. |
+| **Disk Space** | Limited temporary disk space (`/tmp`).              | Can rely on EBS volumes or instance store for disk space. |
+| **Server Management** | Fully serverless.                                   | Relies on EC2 instances (managed by AWS Batch).      |
+| **Use Case** | Short-running, event-driven functions.              | Long-running, compute-intensive batch jobs.          |
+
+### Amazon LightSail
+
+Amazon LightSail provides a simplified way to launch virtual private servers (VPS), storage, databases, and networking, targeting users with little cloud experience.
+
+* **Simplified Cloud**: Obfuscates the underlying intricacies of AWS services like EC2, RDS, ELB, and EBS, offering a simpler interface.
+* **Alternative for Beginners**: A more straightforward alternative for setting up basic web applications or development environments compared to configuring individual AWS services.
+* **Monitoring & Notifications**: Allows you to set up notifications and basic monitoring.
+* **Predictable Pricing**: Offers low and predictable monthly pricing bundles.
+* **High Availability (Limited)**: Provides high availability within a single Availability Zone but typically **does not include auto-scaling** or deep integration with the full suite of advanced AWS services like auto-scaling groups or complex VPC networking.
