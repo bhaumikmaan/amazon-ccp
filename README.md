@@ -88,6 +88,17 @@ Welcome to my learning repository for the AWS Cloud Practitioner certification! 
     * [AWS Batch](#aws-batch)
         * [Lambda vs. Batch Comparison](#lambda-vs-batch-comparison)
     * [Amazon LightSail](#amazon-lightsail)
+* [Deploying and Managing Infrastructure at Scale](#deploying-and-managing-infrastructure-at-scale)
+    * [AWS CloudFormation](#aws-cloudformation)
+    * [AWS Cloud Development Kit (CDK)](#aws-cloud-development-kit-cdk)
+    * [AWS Elastic Beanstalk](#aws-elastic-beanstalk)
+    * [AWS CodeDeploy](#aws-codedeploy)
+    * [AWS CodeBuild](#aws-codebuild)
+    * [AWS CodePipeline](#aws-codepipeline)
+    * [AWS CodeArtifact](#aws-codeartifact)
+    * [AWS Systems Manager (SSM)](#aws-systems-manager-ssm)
+        * [SSM Parameter Store](#ssm-parameter-store)
+        * [SSM Session Manager](#ssm-session-manager)
 
 ---
 
@@ -1114,3 +1125,114 @@ Amazon LightSail provides a simplified way to launch virtual private servers (VP
 * **Monitoring & Notifications**: Allows you to set up notifications and basic monitoring.
 * **Predictable Pricing**: Offers low and predictable monthly pricing bundles.
 * **High Availability (Limited)**: Provides high availability within a single Availability Zone but typically **does not include auto-scaling** or deep integration with the full suite of advanced AWS services like auto-scaling groups or complex VPC networking.
+
+---
+
+## Deploying and Managing Infrastructure at Scale
+
+AWS provides a powerful suite of services to help you define, deploy, and manage your infrastructure and applications at scale, often leveraging Infrastructure as Code (IaC) and Continuous Integration/Continuous Delivery (CI/CD) principles.
+
+### AWS CloudFormation
+
+CloudFormation is AWS's native Infrastructure as Code (IaC) service, allowing you to model and provision AWS and third-party resources in a declarative way.
+
+* **Declarative Infrastructure**: You define a template (in JSON or YAML) that outlines exactly how you want your AWS infrastructure to look (e.g., EC2 instances, S3 buckets, RDS databases). CloudFormation then provisions and configures these resources in the correct order.
+* **Benefits**:
+    * **Infrastructure as Code (IaC)**: Resources are not created manually, ensuring consistency. Changes to your infrastructure are reviewed through code, promoting collaboration and version control.
+    * **Cost Management**: Each resource within a CloudFormation stack can be tagged with an identifier, making it easier to determine costs. The cost of resources can also be estimated from the template.
+    * **Productivity**: Provides the ability to easily destroy and recreate entire infrastructure environments on the fly. It enables automated generation of environments via declarative programming.
+    * **No Reinvention**: Leverage existing documentation and pre-built templates for common architectures.
+    * **Comprehensive Support**: Supports virtually all AWS resources, as well as some third-party resources.
+
+### AWS Cloud Development Kit (CDK)
+
+The AWS Cloud Development Kit (CDK) is an open-source software development framework that allows you to define your cloud infrastructure using familiar programming languages.
+
+* **Code-First Approach**: Define your AWS infrastructure using languages like JavaScript, TypeScript, Python, Java, C#, or Go, rather than directly writing JSON/YAML for CloudFormation.
+* **Transpiles to CloudFormation**: Your CDK code is compiled ("synthesized") into a standard CloudFormation template (JSON/YAML), which is then deployed by CloudFormation.
+* **Unified Deployment**: Enables deploying both infrastructure (e.g., Lambda functions, ECS/EKS clusters) and application runtime code together within the same development workflow.
+
+### AWS Elastic Beanstalk
+
+AWS Elastic Beanstalk is a Platform as a Service (PaaS) offering that simplifies the deployment and scaling of web applications and services.
+
+* **Developer-Centric View**: Provides an easy-to-use interface for deploying applications without needing deep knowledge of the underlying AWS services.
+* **Leverages Core AWS Services**: Uses various AWS components like EC2, Elastic Load Balancing (ELB), RDS, Auto Scaling Groups (ASG), etc., but presents them in a single, unified view, simplifying management.
+* **Configurability**: You retain control over every configuration aspect, from instance types to database settings, if desired.
+* **Managed Service**:
+    * Handles instance configuration and OS patching.
+    * Deployment strategies (e.g., all-at-once, rolling) are configurable and performed by Beanstalk.
+    * Manages capacity provisioning, load balancing, and auto-scaling.
+    * Provides application health monitoring and responsiveness checks.
+* **Your Responsibility**: The developer is primarily responsible only for the application code.
+* **Health Monitoring**: Beanstalk includes a health agent that pushes metrics to CloudWatch, checks for application health, and publishes health events.
+
+### AWS CodeDeploy
+
+AWS CodeDeploy is a fully managed deployment service that automates software deployments to a variety of compute services, including Amazon EC2 instances, AWS Lambda, AWS Fargate, and on-premises servers.
+
+* **Automated Deployment**: Automates the process of deploying application code.
+* **Hybrid Service**: Works with both EC2 instances and on-premises servers.
+* **Agent Requirement**: Servers/instances must be provisioned and pre-configured with the CodeDeploy agent for deployments to work.
+
+### AWS CodeBuild
+
+AWS CodeBuild is a fully managed continuous integration service that compiles source code, runs tests, and produces software packages that are ready to be deployed.
+
+* **Code Building in the Cloud**: A service for building and testing code.
+* **Benefits**:
+    * **Fully Managed**: AWS handles all the infrastructure; no servers to provision or manage.
+    * **Serverless & Secure**: Operates serverlessly, with integrated security features.
+    * **Continuously Scalable & Highly Available**: Automatically scales to meet demand and offers high availability.
+    * **Pay-as-you-go Pricing**: You only pay for the compute time consumed during the build process.
+
+### AWS CodePipeline
+
+AWS CodePipeline is a fully managed continuous delivery service that automates your release pipelines for fast and reliable application and infrastructure updates.
+
+* **Orchestration**: Orchestrates the different steps in your software release process, from code commit to deployment in production.
+* **CI/CD Foundation**: Forms the basis for Continuous Integration (CI) and Continuous Delivery (CD) pipelines.
+* **Typical Flow**: Often connects services like CodeCommit (source) -> CodeBuild (build) -> CodeDeploy (deploy) -> Elastic Beanstalk (or other deployment targets).
+* **Fully Managed**: AWS handles the infrastructure for the pipeline itself.
+* **Compatibility**: Compatible with various AWS services, GitHub, and many third-party services.
+* **Benefits**: Enables fast delivery and rapid updates of applications.
+
+### AWS CodeArtifact
+
+AWS CodeArtifact is a secure, scalable, and cost-effective artifact management system.
+
+* **Artifact Management**: Used for storing and retrieving software packages and code dependencies.
+* **Tool Compatibility**: Works with common dependency management tools like Maven, Gradle, npm, yarn, pip, and more.
+* **Developer Workflow**: Developers and CI/CD services (like CodeBuild) can retrieve project dependencies directly from CodeArtifact, streamlining the build process.
+
+### AWS Systems Manager (SSM)
+
+AWS Systems Manager is a suite of tools that helps you view and control your infrastructure on AWS and on-premises at scale.
+
+* **Centralized Management**: Provides operational insights into the state of your infrastructure.
+* **Cross-Platform**: Works for Linux, Windows, macOS, and even Raspberry Pi devices.
+* **Suite of Products**: Offers over 10 different capabilities for management.
+* **Important Features**:
+    * **Patching Automation**: Automates the process of applying security patches and updates for enhanced compliance.
+    * **Run Command**: Allows you to remotely and securely execute commands across your entire fleet of servers.
+    * **Parameter Store**: Securely stores configuration data and secrets.
+
+#### SSM Parameter Store
+
+* **Secure Storage**: Provides secure storage for configuration data and secrets like API keys, passwords, and other application configurations.
+* **Serverless & Scalable**: A fully managed, serverless, scalable, and durable service.
+* **Easy SDK Access**: Easily integrated with application code via SDKs.
+* **Access Control**: Control access permissions using IAM, with optional version tracking and encryption for parameters.
+
+#### SSM Session Manager
+
+* **Secure Shell Access**: Allows you to start a secure, browser-based shell on your EC2 instances and on-premises servers.
+* **Enhanced Security**:
+    * **No SSH Keys/Bastion Hosts**: Eliminates the need for SSH access, opening port 22, or managing bastion hosts and SSH keys, significantly improving security posture.
+    * **Centralized Access**: Provides centralized access control and auditing.
+* **Session Logging**: Can send session log data to Amazon S3 or AWS CloudWatch for auditing and compliance.
+* **Usage**:
+    * To view instances managed by SSM: Navigate to `SSM -> Fleet Manager`.
+    * To start a session: Go to `SSM -> Session Manager -> Select the EC2 instance and click "Start Session"`.
+    * Once connected, running `hostname` will show the IP of the EC2 instance itself.
+* **Note**: Without Session Manager, connecting to an instance via SSH (port 22) would require the port to be explicitly open in security groups.
