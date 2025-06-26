@@ -99,6 +99,15 @@ Welcome to my learning repository for the AWS Cloud Practitioner certification! 
     * [AWS Systems Manager (SSM)](#aws-systems-manager-ssm)
         * [SSM Parameter Store](#ssm-parameter-store)
         * [SSM Session Manager](#ssm-session-manager)
+* [Global Infrastructure & Global Applications](#global-infrastructure--global-applications)
+    * [Amazon Route 53](#amazon-route-53)
+    * [Amazon CloudFront](#amazon-cloudfront)
+    * [S3 Transfer Acceleration](#s3-transfer-acceleration)
+    * [AWS Global Accelerator](#aws-global-accelerator)
+        * [Comparison: AWS Global Accelerator vs. CloudFront](#comparison-aws-global-accelerator-vs-cloudfront)
+    * [AWS Outposts](#aws-outposts)
+    * [AWS Wavelength](#aws-wavelength)
+    * [AWS Local Zones](#aws-local-zones)
 
 ---
 
@@ -1236,3 +1245,107 @@ AWS Systems Manager is a suite of tools that helps you view and control your inf
     * To start a session: Go to `SSM -> Session Manager -> Select the EC2 instance and click "Start Session"`.
     * Once connected, running `hostname` will show the IP of the EC2 instance itself.
 * **Note**: Without Session Manager, connecting to an instance via SSH (port 22) would require the port to be explicitly open in security groups.
+
+## Global Infrastructure & Global Applications
+
+A **Global Application** is an application deployed in multiple geographies (AWS Regions and/or Edge Locations) to achieve various benefits such as decreased latency for users, enhanced disaster recovery capabilities, and improved protection against attacks.
+
+AWS's global infrastructure is the backbone that enables these applications. Key services that support global applications include:
+
+* **Global DNS (Route 53)**: Routes users to the closest deployment for low latency.
+* **Global Content Delivery Network (CDN) (CloudFront)**: Replicates parts of an application (content) to edge locations globally and caches common requests.
+* **S3 Transfer Acceleration**: Accelerates global uploads and downloads into Amazon S3 buckets.
+* **Global Accelerator**: Improves application availability and performance by leveraging the AWS global network.
+
+### Amazon Route 53
+
+Amazon Route 53 is a highly available and scalable cloud Domain Name System (DNS) web service. DNS is a collection of rules and records that translate human-readable domain names (like `example.com`) into numerical IP addresses, helping clients understand how to reach a server.
+
+* **Managed DNS**: AWS fully manages the DNS infrastructure.
+* **Routing Policies**: Route 53 offers various routing policies to control how traffic is routed to your resources:
+    * **Simple Routing Policy**: A basic request-response set where you route all traffic for a domain to a single resource (e.g., an EC2 instance, an ELB). No health checks are performed.
+    * **Weighted Routing Policy**: Allows you to route traffic to multiple resources in proportions that you specify (e.g., send 80% of traffic to server A and 20% to server B). Each server has a weight assigned, and traffic is routed accordingly. Useful for A/B testing or blue/green deployments.
+    * **Latency Routing Policy**: Routes requests to the AWS region that provides the lowest latency for the user. It determines the region based on the latency between users and AWS regions and routes traffic to the closest/fastest server.
+    * **Failover Routing Policy**: Used for disaster recovery. You configure a primary resource and a secondary (failover) resource. Route 53 performs health checks on the primary, and if it fails, it automatically routes traffic to the failover server.
+
+### Amazon CloudFront
+
+AWS CloudFront is a fast content delivery network (CDN) service that securely delivers data, videos, applications, and APIs to customers globally with low latency.
+
+* **Content Delivery Network (CDN)**: Improves read performance by caching content closer to your users at **Edge Locations**. This significantly improves the user experience (UX).
+* **Global Presence**: CloudFront has over 400 Points of Presence (PoPs) globally (Edge Locations).
+* **Security**: Provides strong security features, including DDoS protection and integration with AWS Shield and AWS Web Application Firewall (WAF).
+* **Origins (Content Sources)**: CloudFront can pull content from various origins:
+    * **S3 Bucket**: Common for distributing static files (images, videos, HTML) and caching them at the edge. It can also be used for secure uploads to S3 through CloudFront, often secured using **Origin Access Control (OAC)** to restrict direct S3 access.
+    * **VPC Origin**: For applications hosted on EC2 instances or other services within a VPC (even in private subnets).
+    * **Custom Origin (HTTP)**: Can point to any public HTTP backend, including S3 static websites, on-premises servers, or other cloud providers.
+* **Replication & Caching**:
+    * Leverages AWS's global edge network.
+    * Content is cached at edge locations for a configurable "Time To Live" (TTL).
+    * Files are updated in near real-time (when TTL expires or invalidated) and served as read-only copies from the cache.
+* **Use Cases**:
+    * Excellent for **static content** that must be available globally with low latency (e.g., website assets).
+    * Can also be used for **dynamic content** that needs to be available at low latency in few regions by proxying requests.
+
+### S3 Transfer Acceleration
+
+S3 Transfer Acceleration enables fast, easy, and secure transfers of files over long distances between your client and an S3 bucket.
+
+* **Increased Transfer Speed**: Significantly increases transfer speeds, especially for global uploads and downloads.
+* **Edge Location Leverage**: Achieves acceleration by routing data through AWS Edge Locations. Your client uploads data to a nearby edge location, which then uses the optimized AWS global network backbone to forward the data to the target S3 bucket in the specified AWS Region.
+
+### AWS Global Accelerator
+
+AWS Global Accelerator is a networking service that improves the availability and performance of your applications with users across the globe.
+
+* **Global Network Optimization**: Leverages the highly performant AWS global network to optimize the route from your users to your application endpoints.
+* **Static Anycast IP Addresses**: You are provided with two static Anycast IP addresses that act as fixed entry points to your application. These IPs are advertised from AWS edge locations worldwide.
+* **Traffic Routing**: User traffic enters the AWS global network at the closest edge location and is then routed over the optimized AWS backbone to your application endpoints in an AWS Region.
+* **Improved Availability & Performance**: Helps improve application availability by automatically re-routing traffic to the healthiest available endpoint in case of failures, and improves performance by directing traffic over the fastest network path.
+
+#### Comparison: AWS Global Accelerator vs. CloudFront
+
+Both services use the AWS global network and its edge locations around the world, and both integrate with AWS Shield for DDoS protection. However, their primary use cases differ:
+
+| Feature           | Amazon CloudFront                                      | AWS Global Accelerator                                 |
+| :---------------- | :----------------------------------------------------- | :----------------------------------------------------- |
+| **Primary Goal** | CDN for **caching content** at the edge.               | Improves **application performance and availability** via optimized routing. |
+| **Content Type** | Best for **cacheable content** (static files).         | Best for **non-cacheable content** or applications that require consistent routing. |
+| **Protocol Focus**| Primarily HTTP/HTTPS.                                  | Improves performance for applications over **TCP/UDP** (and HTTP). |
+| **Traffic Path** | Content is served from the edge cache if available.    | Proxies packets at the edge directly to application endpoints in one or more AWS Regions. |
+| **IP Addresses** | Uses dynamic DNS names; IP addresses of edge locations can change. | Provides **static IP addresses** for application entry points. |
+| **Failover** | Based on DNS changes or origin failover settings.      | Offers **deterministic and fast regional failover** (sub-minute). |
+| **Best For** | Static websites, streaming video, APIs, download delivery. | Gaming, IoT, VoIP, HTTP microservices needing static IPs, multi-region failover. |
+
+### AWS Outposts
+
+AWS Outposts brings native AWS services, infrastructure, and operating models to virtually any data center, co-location space, or on-premises facility.
+
+* **On-Premises AWS**: Provides server racks that offer the same AWS infrastructure, services, APIs, and tools that you use in an AWS Region, but within your own on-premises environment.
+* **Managed by AWS**: AWS sets up, manages, and updates the Outposts racks within your on-premises infrastructure. You can then leverage AWS services directly on-premises.
+* **Your Responsibility**: The user is responsible for the Outposts racks' physical security, power, and networking.
+* **Benefits**:
+    * **Low Latency Access**: Enables ultra-low latency access to on-premises systems and applications.
+    * **Local Data Processing**: Process data locally to meet specific data residency requirements.
+    * **Data Residency**: Helps address data residency requirements by keeping data within your premises.
+    * **Easier Migration**: Facilitates easier migration of applications with dependencies on on-premises systems to the cloud.
+    * **Fully Managed Service**: Works seamlessly with services like EC2, S3, EBS, EKS, ECS, RDS, and more, as if they were in a regular AWS Region.
+
+### AWS Wavelength
+
+AWS Wavelength extends AWS compute and storage services to the edge of the 5G networks, enabling ultra-low latency applications for mobile users.
+
+* **Edge of 5G Networks**: Wavelength Zones are infrastructure deployments embedded within telecom providers' data centers at the edge of the 5G networks.
+* **Ultra-Low Latency**: Designed for ultra-low latency applications that require single-digit millisecond response times, directly leveraging 5G networks.
+* **Network Path**: Traffic doesn't leave the communication service provider's network, minimizing latency.
+* **Use Cases**: Smart factories, autonomous vehicles, live video streaming, interactive gaming, and other real-time applications.
+* **High Bandwidth & Secure Connection**: Provides high-bandwidth and secure connections to the parent AWS Region.
+
+### AWS Local Zones
+
+AWS Local Zones are a type of AWS infrastructure deployment that places AWS compute, storage, database, and other select AWS services closer to large population, industry, and IT centers.
+
+* **Proximity to End Users**: Extends the AWS Region to provide low-latency access for latency-sensitive applications closer to specific end-user populations.
+* **VPC Extension**: Essentially extends your Virtual Private Cloud (VPC) to more locations.
+* **Compatibility**: Compatible with popular services like EC2, RDS, ECS, EBS, ElastiCache, and Direct Connect.
+* **Use Cases**: Media and entertainment content creation, real-time gaming, electronic design automation, and other applications requiring very low latency.
